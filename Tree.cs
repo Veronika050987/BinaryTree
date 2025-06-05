@@ -7,13 +7,13 @@ using System.Xml.Linq;
 
 namespace BinaryTree
 {
-    class Tree
-    {
+	class Tree
+	{
 		public Element Root { get; protected set; }
 		public Tree()
 		{
 			Root = null;
-			Console.WriteLine($"TConstructor:{GetHashCode()}");///////
+			Console.WriteLine($"TConstructor:{GetHashCode()}");
 		}
 		~Tree()
 		{
@@ -84,77 +84,102 @@ namespace BinaryTree
 		{
 			return Depth(Root);
 		}
-
-		private int Depth(Element root)
+		int Depth(Element Root)
 		{
-			if (root == null)
-			{
-				return 0;
-			}
-
-			return 1 + Math.Max(Depth(root.pLeft), Depth(root.pRight));
+			if (Root == null) return 0;
+			int lDepth = Depth(Root.pLeft);
+			int rDepth = Depth(Root.pRight);
+			return (lDepth > rDepth ? lDepth : rDepth) + 1;
 		}
-
-		//int Depth(Element Root)
-		//{
-		//	if (Root == null) return 0;
-		//	int lDepth = Depth(Root.pLeft);
-		//	int rDepth = Depth(Root.pRight);
-		//	return (lDepth > rDepth ? lDepth : rDepth) + 1;
-		//}
-		//public void DepthPrint(int Depth)
-		//{
-		//	DepthPrint(Root, Depth);
-		//	Console.WriteLine();
-		//	Console.WriteLine();
-		//	Console.WriteLine();
-		//}
-		private void DepthPrint(Element root, int depth, int totalDepth)
+		public void DepthPrint(int Depth)
 		{
-			if (root == null) return;
-
-			int interval = (int)Math.Pow(2, totalDepth - depth) - 2; // Adjusted space calculation
-			PrintInterval(interval);
-
-			if (root.pLeft != null)
-			{
-				DepthPrint(root.pLeft, depth + 1, totalDepth);
-			}
-
-			Console.Write(root.Data + " ");
-
-			if (root.pRight != null)
-			{
-				DepthPrint(root.pRight, depth + 1, totalDepth);
-			}
-			PrintInterval(interval);
+			DepthPrint(Root, Depth);
+			Console.WriteLine();
+			Console.WriteLine();
+			Console.WriteLine();
 		}
-		public void TreePrint()
+		void DepthPrint(Element Root, int Depth)
 		{
 			if (Root == null) return;
-			int totalDepth = Depth();
-			for (int depth = 0; depth <= totalDepth; depth++)
+			int interval = 4 * (this.Depth(this.Root) - Depth);
+			if (Depth == 0)
 			{
-				DepthPrint(Root, depth, totalDepth);
-				Console.WriteLine(); // Print a new line after each level
+				//Console.Write(Root.Data.ToString().PadLeft(interval));
+				//PrintInterval(this.Depth(this.Root) - Depth);
+				Console.Write(Root.Data);
+				PrintInterval(this.Depth(this.Root) - Depth);
+				PrintInterval(this.Depth(this.Root) - Depth);
+				PrintInterval(this.Depth(this.Root) - Depth);
+			}
+			else
+			{
+				DepthPrint(Root.pLeft, Depth - 1);
+				DepthPrint(Root.pRight, Depth - 1);
 			}
 		}
-		private void PrintInterval(int interval)
+
+		public void TreePrint(int Depth = 0)
 		{
-			Console.Write("".PadLeft(interval * 4, ' '));
+			if (Root == null) return;
+			if (this.Depth(this.Root) - Depth == 0) return;
+			//int interval = 4 * (this.Depth() - Depth);
+			//Console.Write("".PadLeft(interval));
+			PrintInterval(this.Depth(this.Root) - Depth);
+			PrintInterval(this.Depth(this.Root) - Depth);
+			//PrintInterval(this.Depth(this.Root) - Depth);
+			DepthPrint(Depth);
+			TreePrint(Depth + 1);
+		}
+	
+		void PrintInterval(int count)
+		{
+			for (int i = 0; i < count; i++) Console.Write("    ");
 		}
 		public void Print()
 		{
 			Print(Root);
+			Console.WriteLine();
 		}
 		void Print(Element Root)
 		{
-			if (Root != null)
+			if (Root == null) return;
+			Print(Root.pLeft);
+			Console.Write(Root.Data + "\t");
+			Print(Root.pRight);
+		}
+
+		private void InorderTraversal(Element root, List<int> sortedList)
+		{
+			if (root != null)
 			{
-				Print(Root.pLeft);
-				Console.Write(Root.Data + " ");
-				Print(Root.pRight);
+				InorderTraversal(root.pLeft, sortedList);
+				sortedList.Add(root.Data);
+				InorderTraversal(root.pRight, sortedList);
 			}
+		}
+
+		private Element BuildBalancedTree(List<int> sortedList, int start, int end)
+		{
+			if (start > end)
+			{
+				return null;
+			}
+
+			int mid = (start + end) / 2;
+			Element node = new Element(sortedList[mid]);
+			node.pLeft = BuildBalancedTree(sortedList, start, mid - 1);
+			node.pRight = BuildBalancedTree(sortedList, mid + 1, end);
+			return node;
+		}
+
+		public void Balance()
+		{
+			if (Root == null) return;
+
+			List<int> sortedList = new List<int>();
+			InorderTraversal(Root, sortedList);
+
+			Root = BuildBalancedTree(sortedList, 0, sortedList.Count - 1);
 		}
 	}
 }
