@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace BinaryTree
 {
-    class Tree
-    {
+	class Tree
+	{
 		public Element Root { get; protected set; }
 		public Tree()
 		{
@@ -108,6 +109,7 @@ namespace BinaryTree
 				Console.Write(Root.Data);
 				PrintInterval(this.Depth(this.Root) - Depth);
 				PrintInterval(this.Depth(this.Root) - Depth);
+				PrintInterval(this.Depth(this.Root) - Depth);
 			}
 			else
 			{
@@ -115,6 +117,7 @@ namespace BinaryTree
 				DepthPrint(Root.pRight, Depth - 1);
 			}
 		}
+
 		public void TreePrint(int Depth = 0)
 		{
 			if (Root == null) return;
@@ -127,6 +130,7 @@ namespace BinaryTree
 			DepthPrint(Depth);
 			TreePrint(Depth + 1);
 		}
+	
 		void PrintInterval(int count)
 		{
 			for (int i = 0; i < count; i++) Console.Write("    ");
@@ -142,6 +146,40 @@ namespace BinaryTree
 			Print(Root.pLeft);
 			Console.Write(Root.Data + "\t");
 			Print(Root.pRight);
+		}
+
+		private void InorderTraversal(Element root, List<int> sortedList)
+		{
+			if (root != null)
+			{
+				InorderTraversal(root.pLeft, sortedList);
+				sortedList.Add(root.Data);
+				InorderTraversal(root.pRight, sortedList);
+			}
+		}
+
+		private Element BuildBalancedTree(List<int> sortedList, int start, int end)
+		{
+			if (start > end)
+			{
+				return null;
+			}
+
+			int mid = (start + end) / 2;
+			Element node = new Element(sortedList[mid]);
+			node.pLeft = BuildBalancedTree(sortedList, start, mid - 1);
+			node.pRight = BuildBalancedTree(sortedList, mid + 1, end);
+			return node;
+		}
+
+		public void Balance()
+		{
+			if (Root == null) return;
+
+			List<int> sortedList = new List<int>();
+			InorderTraversal(Root, sortedList);
+
+			Root = BuildBalancedTree(sortedList, 0, sortedList.Count - 1);
 		}
 	}
 }
